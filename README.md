@@ -1,4 +1,4 @@
-# GenCryptoFetcher
+# CryptoTracker
 
 **TODO: Add description**
 

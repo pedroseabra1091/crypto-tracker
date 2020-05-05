@@ -13,6 +13,11 @@ defmodule CryptoTracker.PortfolioManager do
 
   def prepare(portfolio \\ []), do: GenServer.start_link(__MODULE__, portfolio)
 
+  # Uncomment if you want to add your portfolio through iex
+  # def init(_portfolio) do
+  #   {:ok, self()}
+  # end
+
   def init(portfolio) do
     create(self(), %Coin{name: "ethereum", symbol: "ETH", position_price: 100, position_size: 10})
     create(self(), %Coin{name: "ethereum-classic", symbol: "ETC", position_price: nil})

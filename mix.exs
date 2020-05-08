@@ -15,7 +15,7 @@ defmodule CryptoTracker.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {CryptoTracker.Application, []}
+      mod: {CryptoTracker, []}
     ]
   end
 

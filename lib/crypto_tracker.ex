@@ -5,7 +5,7 @@ defmodule CryptoTracker do
     children = [
       %{
         id: CryptoTracker.PortfolioManager,
-        start: {CryptoTracker.PortfolioManager, :prepare, []}
+        start: {CryptoTracker.PortfolioManager, :start_link, []}
       }
     ]
     # Supervisor strategies:

@@ -3,7 +3,7 @@ defmodule CryptoTracker.CoinTracker do
 
   alias CryptoTracker.CoinData
 
-  def prepare, do: GenServer.start_link(__MODULE__, [])
+  def start_link, do: GenServer.start_link(__MODULE__, [])
 
   def init(init_args) do
     {:ok, init_args}

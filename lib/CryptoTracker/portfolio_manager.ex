@@ -11,7 +11,7 @@ defmodule CryptoTracker.PortfolioManager do
 
   require IEx
 
-  def prepare(portfolio \\ []), do: GenServer.start_link(__MODULE__, portfolio)
+  def start_link(portfolio \\ []), do: GenServer.start_link(__MODULE__, portfolio)
 
   # Uncomment if you want to add your portfolio through iex
   # def init(_portfolio) do
@@ -80,7 +80,7 @@ defmodule CryptoTracker.PortfolioManager do
   end
 
   def track_coin(coin_name) do
-    {:ok, pid} = CoinTracker.prepare
+    {:ok, pid} = CoinTracker.start_link
     CoinTracker.track(pid, coin_name)
   end
 

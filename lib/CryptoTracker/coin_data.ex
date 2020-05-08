@@ -8,9 +8,7 @@ defmodule CryptoTracker.CoinData do
     |> parse
   end
 
-  defp parse(%{"data" => %{"priceUsd" => price_usd}}) do
-    {:ok, String.to_float(price_usd)}
-  end
+  defp parse(%{"data" => %{"priceUsd" => price_usd}}), do: {:ok, String.to_float(price_usd)}
 
   defp parse(%{"error" => error}), do: {:error, error}
 

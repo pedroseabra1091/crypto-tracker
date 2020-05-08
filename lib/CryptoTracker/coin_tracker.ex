@@ -3,13 +3,13 @@ defmodule CryptoTracker.CoinTracker do
 
   alias CryptoTracker.CoinData
 
-  def start_link, do: GenServer.start_link(__MODULE__, [])
+  def start_link, do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
   def init(init_args) do
     {:ok, init_args}
   end
 
-  def track(pid, coin_name), do: GenServer.call(pid, {:track, coin_name})
+  def track(coin_name), do: GenServer.call(__MODULE__, {:track, coin_name})
 
   def handle_call({:track, coin_name}, _from, state) do
     coin_name

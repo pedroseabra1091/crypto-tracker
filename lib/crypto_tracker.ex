@@ -4,6 +4,10 @@ defmodule CryptoTracker do
   def start(_type, _args) do
     children = [
       %{
+        id: CryptoTracker.CoinTracker,
+        start: {CryptoTracker.CoinTracker, :start_link, []}
+      },
+      %{
         id: CryptoTracker.PortfolioManager,
         start: {CryptoTracker.PortfolioManager, :start_link, []}
       }
@@ -14,6 +18,6 @@ defmodule CryptoTracker do
     # child processes are restarted
     # - :rest_for_one - if a child process terminates, the terminated child process and the rest of the children
     # started after it, are terminated and restarted
-    Supervisor.start_link(children, strategy: :one_for_one)
+    Supervisor.start_link(children, strategy: :one_for_all)
   end
 end

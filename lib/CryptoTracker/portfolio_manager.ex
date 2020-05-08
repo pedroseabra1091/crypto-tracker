@@ -11,35 +11,35 @@ defmodule CryptoTracker.PortfolioManager do
 
   require IEx
 
-  def start_link(portfolio \\ []), do: GenServer.start_link(__MODULE__, portfolio)
+  def start_link, do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
   # Uncomment if you want to add your portfolio through iex
   # def init(_portfolio) do
   #   {:ok, self()}
   # end
 
-  def init(portfolio) do
-    create(self(), %Coin{name: "ethereum", symbol: "ETH", position_price: 100, position_size: 10})
-    create(self(), %Coin{name: "ethereum-classic", symbol: "ETC", position_price: nil})
-    track(self())
-    {:ok, portfolio}
+  def init(init_args) do
+    create(%Coin{name: "ethereum", symbol: "ETH", position_price: 100, position_size: 10})
+    create(%Coin{name: "ethereum-classic", symbol: "ETC", position_price: nil})
+    track()
+    {:ok, init_args}
   end
 
-  def track(pid) do
-    schedule_portfolio_fetch(pid)
-    schedule_portfolio_tracker_reset(pid)
+  def track() do
+    schedule_portfolio_fetch()
+    schedule_portfolio_tracker_reset()
   end
 
-  def create(pid, coin) do
-    GenServer.cast(pid, {:create, coin})
+  def create(coin) do
+    GenServer.cast(__MODULE__, {:create, coin})
   end
 
-  def show(pid) do
-    GenServer.call(pid, {:show})
+  def show() do
+    GenServer.call(__MODULE__, {:show})
   end
 
-  def delete(pid, coin) do
-    GenServer.call(pid, {:delete, coin})
+  def delete(coin) do
+    GenServer.call(__MODULE__, {:delete, coin})
   end
 
   def handle_cast({:create, coin}, portfolio) do
@@ -63,26 +63,20 @@ defmodule CryptoTracker.PortfolioManager do
   def handle_info(:fetch_portfolio, portfolio) do
     Enum.each(portfolio, &track_and_log/1)
 
-    schedule_portfolio_fetch(self())
+    schedule_portfolio_fetch()
     {:noreply, portfolio}
   end
 
   def track_and_log(coin) do
-    case track_coin(coin.name) do
-      {:ok, current_market_value} ->
-        current_market_value
+    {:ok, current_market_value} = track_coin(coin.name)
+
+    current_market_value
         |> calculate_change(coin)
         |> Float.round(3)
         |> log_or_notify(coin)
-      {:error, error} ->
-        error
-    end
   end
 
-  def track_coin(coin_name) do
-    {:ok, pid} = CoinTracker.start_link
-    CoinTracker.track(pid, coin_name)
-  end
+  def track_coin(coin_name), do: CoinTracker.track(coin_name)
 
   defp calculate_change(current_market_value, %Coin{position_price: nil, market_value: market_value}) do
     ((current_market_value - market_value) / market_value)
@@ -104,7 +98,7 @@ defmodule CryptoTracker.PortfolioManager do
     IO.puts("#{coin.symbol} latest market value: #{coin.market_value * (1 + change)}$")
   end
 
-  def push_notification(title, subtitle, message) do
+  defp push_notification(title, subtitle, message) do
     opts = ["-title", title, "-subtitle", subtitle, "-message", message, "-open", "https://www.coinbase.com/", "-sound", "default"]
     Rambo.run("terminal-notifier", opts)
   end
@@ -113,7 +107,7 @@ defmodule CryptoTracker.PortfolioManager do
     ((coin.position_price * (1 + change)) * coin.position_size) |> Float.round(3)
   end
 
-  def schedule_portfolio_fetch(pid), do: Process.send_after(pid, :fetch_portfolio, @request_interval)
+  def schedule_portfolio_fetch(), do: Process.send_after(__MODULE__, :fetch_portfolio, @request_interval)
 
-  def schedule_portfolio_tracker_reset(pid), do: Process.send_after(pid, :track_reset, 24 * 60 * 60 * 1000)
+  def schedule_portfolio_tracker_reset(), do: Process.send_after(__MODULE__, :track_reset, 24 * 60 * 60 * 1000)
 end
